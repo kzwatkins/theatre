@@ -18,46 +18,42 @@ class Theatre(object):
         self.cinema_sprite = SpriteClass("../images/cinematheatre.png", BLACK, int(min(WIDTH, HEIGHT)))
         self.cinema = self.cinema_sprite.get_image()
         self.sprite_rects = []
-        # self.cinema = pygame.image.load("../images/cinematheatre.png")
-        # self.cinema_rect = self.cinema.get_rect()
-        # self.cinema = self.cinema.convert()
-        # self.cinema.set_colorkey(BLACK, pygame.RLEACCEL)
-        # self.cinema_scale = int(min(WIDTH, HEIGHT))
-        # self.cinema = pygame.transform.scale(self.cinema, (self.cinema_scale, self.cinema_scale))
         self.image_scale_factor = int(min(WIDTH, HEIGHT) / 8)
         self.DISPLAYSURF_RECT = self.DISPLAYSURF.get_rect()
         self.DISPLAYSURF_CENTERX = self.DISPLAYSURF_RECT.centerx
         self.DISPLAYSURF_CENTERY = self.DISPLAYSURF_RECT.centery
-        # self.cinema_rect = self.cinema.get_rect() # Redo after resize!
 
     def add_sprite_by_filename(self, filename, colorkey = None, scale = 1):
         sprite = SpriteClass(filename, colorkey, scale)
         self.sprites.append([])
         self.sprite_rects.append([])
         sprites_len = len(self.sprites)
-        self.sprites[sprites_len - 1].append(sprite.convert())
-        self.sprite_rects[sprites_len - 1].append(sprite.get_rect)
+        self.sprites[sprites_len - 1] = []
+        self.sprite_rects[sprites_len - 1] = []
+
+        self.sprites[sprites_len - 1].append(sprite.get_image().convert())
+        self.sprite_rects[sprites_len - 1].append(sprite.get_rect())
 
     def add_sprite_from_spritesheet_matrix(self, spritesheet_matrix):
         sprites_matrix = spritesheet_matrix.get_images()
         sprites_matrix_rect = spritesheet_matrix.get_rect()
+        len_sprites = len(self.sprites)
         rows = len(sprites_matrix)
         for row in range(0, rows):
             self.sprites.append([])
             self.sprite_rects.append([])
-            self.sprites[row] = sprites_matrix[row]
-            # self.sprite_rects[row] = []
-            # self.sprite_rects[row].append([])
+            self.sprites[len_sprites] = sprites_matrix[row]
 
             cols = len(sprites_matrix[row])
-            # self.sprite_rects[row] = []
             for col in range(0, cols):
-                self.sprite_rects[row].append(sprites_matrix_rect)
+                self.sprite_rects[len_sprites].append(sprites_matrix_rect)
+
 
     def run(self):
         indices = []
         positions = []
         directions = []
+
         rows = len(self.sprites)
         for row in range(0, rows):
             indices.append(0)
@@ -76,7 +72,11 @@ class Theatre(object):
             for row in range(0, rows):
                 sprites = self.sprites[row]
                 sprite_len = len(self.sprites[row])
+                # TODO Fix issue with empty matrices
+                if sprite_len < 1: continue
+
                 sprite_rects = self.sprite_rects[row]
+
                 if self.fps_count is 0:
                     indices[row] = (indices[row] + 1) % sprite_len
                     self.get_new_direction(positions, directions, row)
@@ -85,7 +85,6 @@ class Theatre(object):
                 sprite = self.pick_sprite(sprites, indices, row)
                 sprite_rect = self.pick_sprite_rect(sprite_rects, indices, row)
 
-                # sprite = sprite.convert()
                 self.DISPLAYSURF.blit(sprite, (positions[row], self.DISPLAYSURF_CENTERY - sprite_rect.centery))
 
             self.check_update()

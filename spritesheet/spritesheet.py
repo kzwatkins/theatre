@@ -17,13 +17,14 @@ class Spritesheet(object):
     def image_at(self, rectangle, colorkey = None, scale = 1):
         """Loads image from x,y,x+offset,y+offset"""
 
-        rect = pygame.Rect(rectangle)
-        image = pygame.Surface(rect.size).convert()
-        image.blit(self.sheet, (0, 0), rect)
-        self.set_colorkey(image, colorkey)
-        image = self.rescale(image, scale)
+        if rectangle is not None:
+            rect = pygame.Rect(rectangle)
+            image = pygame.Surface(rect.size).convert()
+            image.blit(self.sheet, (0, 0), rect)
+            self.set_colorkey(image, colorkey)
+            image = self.rescale(image, scale)
 
-        return image
+            return image
 
     def set_colorkey(self, image, colorkey = None):
         if colorkey is not None:
