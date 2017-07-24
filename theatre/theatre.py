@@ -61,7 +61,7 @@ class Theatre(object):
         rows = len(self.sprites)
         for row in range(0, rows):
             indices.append(0)
-            positions.append(WIDTH/10)
+            positions.append(MIN_POSITION)
             directions.append("right")
 
         while True:
@@ -86,14 +86,14 @@ class Theatre(object):
                 sprite_rect = self.pick_sprite_rect(sprite_rects, indices, row)
 
                 # sprite = sprite.convert()
-                self.DISPLAYSURF.blit(sprite, (self.DISPLAYSURF_CENTERX - sprite_rect.centerx, self.DISPLAYSURF_CENTERY - sprite_rect.centery))
+                self.DISPLAYSURF.blit(sprite, (positions[row], self.DISPLAYSURF_CENTERY - sprite_rect.centery))
 
             self.check_update()
 
     def get_new_direction(self, positions, directions, row):
-        if positions[row] + OFFSET_X >= WIDTH - WIDTH/10:
+        if positions[row] + OFFSET_X >= MAX_POSITION:
             directions[row] = "left"
-        elif positions[row] - OFFSET_X <= WIDTH/10:
+        elif positions[row] - OFFSET_X <= MIN_POSITION:
             directions[row] = "right"
 
     def get_new_position(self, positions, directions, row):
