@@ -1,4 +1,4 @@
-import pygame, sys
+import pygame, sys, random
 from pygame.locals import *
 from constants.constants import *
 from sprites.sprite_class import SpriteClass
@@ -9,6 +9,8 @@ class Theatre(object):
     def __init__(self, caption):
 
         pygame.init()
+        pygame.font.init()
+        self.myfont = pygame.font.SysFont('Comic Sans MS', int(MIN_POSITION/7))
 
         self.fps_clock = pygame.time.Clock()
         self.fps_count = 1
@@ -53,6 +55,9 @@ class Theatre(object):
         indices = []
         positions = []
         directions = []
+        msg_index = 1
+        movement_index = 1
+        msg_movement_index = 1
 
         rows = len(self.sprites)
         for row in range(0, rows):
@@ -69,6 +74,15 @@ class Theatre(object):
 
             self.DISPLAYSURF.blit(self.cinema, (self.DISPLAYSURF_CENTERX - self.cinema_rect.centerx, 0))
 
+            textsurface = self.myfont.render("Created by Kera Z. Watkins", False, BLACK)
+            self.DISPLAYSURF.blit(textsurface, (self.DISPLAYSURF_CENTERX - int(textsurface.get_width() / 2), self.DISPLAYSURF_CENTERX - textsurface.get_height() * 6))
+
+            textsurface = self.myfont.render("Supported by Watkins Proactive Research LLC", False, BLACK)
+            self.DISPLAYSURF.blit(textsurface, (self.DISPLAYSURF_CENTERX - int(textsurface.get_width() / 2), self.DISPLAYSURF_CENTERX - textsurface.get_height() * 5))
+
+            textsurface = self.myfont.render(INTRO_MESSAGES[msg_index], False, BLACK)
+            self.DISPLAYSURF.blit(textsurface, (self.DISPLAYSURF_CENTERX - int(textsurface.get_width() / 2), self.DISPLAYSURF_CENTERX - textsurface.get_height() * 4))
+
             for row in range(0, rows):
                 sprites = self.sprites[row]
                 sprite_len = len(self.sprites[row])
@@ -78,14 +92,21 @@ class Theatre(object):
                 sprite_rects = self.sprite_rects[row]
 
                 if self.fps_count is 0:
-                    indices[row] = (indices[row] + 1) % sprite_len
                     self.get_new_direction(positions, directions, row)
                     self.get_new_position(positions, directions, row)
 
-                sprite = self.pick_sprite(sprites, indices, row)
+                if movement_index is 0:
+                    indices[row] = (indices[row] + 1) % sprite_len
+
+                sprite = self.pick_sprite(sprites, indices, directions[row], row)
                 sprite_rect = self.pick_sprite_rect(sprite_rects, indices, row)
 
                 self.DISPLAYSURF.blit(sprite, (positions[row], self.DISPLAYSURF_CENTERY - sprite_rect.centery))
+
+            movement_index = (movement_index + 1) % MOVEMENT_CHANGE
+            msg_movement_index = (msg_movement_index + 1) % MESSAGE_CHANGE
+            if msg_movement_index is 0:
+                msg_index = random.randrange(0, len(INTRO_MESSAGES))
 
             self.check_update()
 
@@ -101,8 +122,10 @@ class Theatre(object):
         elif directions[row] is "left":
             positions[row] = positions[row] - OFFSET_X
 
-    def pick_sprite(self, sprites, indices, row):
+    def pick_sprite(self, sprites, indices, direction, row):
         sprite = sprites[indices[row]]
+        if(direction == "left"):
+            sprite = pygame.transform.flip(sprite, True, False)
         return sprite
 
     def pick_sprite_rect(self, sprite_rects, indices, row):
